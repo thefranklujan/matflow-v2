@@ -221,4 +221,22 @@ export const common = StyleSheet.create({
     fontSize: 14,
     marginTop: 4,
   },
+  backRow: {
+    flexDirection: "row" as ViewStyle["flexDirection"],
+    alignItems: "center" as ViewStyle["alignItems"],
+    marginTop: theme.spacing.sm,
+    marginBottom: theme.spacing.lg,
+  },
+  backText: {
+    color: theme.colors.brand,
+    fontWeight: "500" as TextStyle["fontWeight"],
+    marginLeft: 4,
+    fontSize: 15,
+  },
+  pageTitle: {
+    fontSize: 24,
+    fontWeight: "700" as TextStyle["fontWeight"],
+    color: "#FFFFFF",
+    marginBottom: theme.spacing["2xl"],
+  },
 });

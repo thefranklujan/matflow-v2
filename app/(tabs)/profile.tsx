@@ -8,12 +8,19 @@ import {
   HelpCircle,
   Moon,
 } from "lucide-react-native";
+import { useRouter } from "expo-router";
 import { useAuthStore } from "@/stores/auth-store";
 import { BRAND } from "@/lib/constants";
 import { theme, common } from "@/lib/theme";
 
 export default function ProfileTab() {
+  const router = useRouter();
   const { profile, activeMembership, signOut } = useAuthStore();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.replace("/(auth)/sign-in");
+  };
 
   const fullName =
     [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") ||
@@ -76,7 +83,7 @@ export default function ProfileTab() {
         {/* Sign Out */}
         <TouchableOpacity
           style={styles.signOutButton}
-          onPress={signOut}
+          onPress={handleSignOut}
           activeOpacity={0.7}
         >
           <LogOut size={18} color={theme.colors.error} />

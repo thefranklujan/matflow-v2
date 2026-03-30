@@ -9,13 +9,16 @@ import {
   Platform,
   StyleSheet,
 } from "react-native";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "@/lib/supabase";
+import { useAuthStore } from "@/stores/auth-store";
 import { BRAND } from "@/lib/constants";
 import { theme, common } from "@/lib/theme";
 
 export default function SignIn() {
+  const router = useRouter();
+  const initialize = useAuthStore((s) => s.initialize);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,6 +40,18 @@ export default function SignIn() {
 
     if (authError) {
       setError(authError.message);
+      setLoading(false);
+      return;
+    }
+
+    // Fetch profile and memberships
+    await initialize();
+
+    const { isOnboarded } = useAuthStore.getState();
+    if (isOnboarded) {
+      router.replace("/(tabs)");
+    } else {
+      router.replace("/onboarding");
     }
 
     setLoading(false);

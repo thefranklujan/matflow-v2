@@ -32,6 +32,18 @@ export default function RootLayout() {
       setSession(session);
       if (session) {
         initialize();
+      } else {
+        // Clear everything on sign out
+        useAuthStore.setState({
+          session: null,
+          user: null,
+          profile: null,
+          memberships: [],
+          activeGymId: null,
+          activeMembership: null,
+          isOnboarded: false,
+          isLoading: false,
+        });
       }
     });
 
