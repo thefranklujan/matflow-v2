@@ -8,11 +8,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/auth-store";
 import { BRAND } from "@/lib/constants";
+import { theme, common } from "@/lib/theme";
 
 const TIMEZONES = [
   "America/New_York",
@@ -25,6 +28,7 @@ const TIMEZONES = [
 ];
 
 export default function Onboarding() {
+  const router = useRouter();
   const { user, initialize } = useAuthStore();
   const [step, setStep] = useState<"role" | "create_gym" | "join_gym">("role");
   const [gymName, setGymName] = useState("");
@@ -55,7 +59,6 @@ export default function Onboarding() {
     setError(null);
 
     try {
-      // Check slug availability
       const { data: existing } = await supabase
         .from("gyms")
         .select("id")
@@ -68,7 +71,6 @@ export default function Onboarding() {
         return;
       }
 
-      // Create the gym
       const { data: gym, error: gymError } = await supabase
         .from("gyms")
         .insert({
@@ -86,7 +88,6 @@ export default function Onboarding() {
 
       if (gymError) throw gymError;
 
-      // Add current user as gym_admin
       const { error: memberError } = await supabase
         .from("gym_members")
         .insert({
@@ -102,8 +103,8 @@ export default function Onboarding() {
 
       if (memberError) throw memberError;
 
-      // Re-initialize auth to pick up new membership
       await initialize();
+      router.replace("/(tabs)");
     } catch (err: any) {
       setError(err.message || "Something went wrong.");
     }
@@ -133,7 +134,6 @@ export default function Onboarding() {
         return;
       }
 
-      // Add as pending member
       const { error: memberError } = await supabase
         .from("gym_members")
         .insert({
@@ -168,40 +168,36 @@ export default function Onboarding() {
   // Step 1: Choose role
   if (step === "role") {
     return (
-      <SafeAreaView className="flex-1 bg-[#0a0a0a] justify-center px-6">
-        <View className="items-center mb-12">
-          <Text className="text-4xl font-bold text-white tracking-tight">
+      <SafeAreaView style={[common.screen, styles.centered]}>
+        <View style={styles.roleHeader}>
+          <Text style={styles.roleTitle}>
             Welcome to{" "}
             <Text style={{ color: BRAND.primaryColor }}>MatFlow</Text>
           </Text>
-          <Text className="text-neutral-500 mt-3 text-base text-center">
+          <Text style={styles.roleSubtitle}>
             Are you setting up a new academy or joining one?
           </Text>
         </View>
 
-        <View className="gap-4">
+        <View style={styles.roleCards}>
           <TouchableOpacity
-            className="bg-[#171717] border border-[#262626] rounded-2xl p-6"
+            style={styles.roleCard}
             onPress={() => setStep("create_gym")}
             activeOpacity={0.7}
           >
-            <Text className="text-white text-lg font-bold mb-1">
-              I'm an Academy Owner
-            </Text>
-            <Text className="text-neutral-500 text-sm">
+            <Text style={styles.roleCardTitle}>I'm an Academy Owner</Text>
+            <Text style={styles.roleCardDesc}>
               Set up your gym, manage members, schedule, pro shop, and more.
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="bg-[#171717] border border-[#262626] rounded-2xl p-6"
+            style={styles.roleCard}
             onPress={() => setStep("join_gym")}
             activeOpacity={0.7}
           >
-            <Text className="text-white text-lg font-bold mb-1">
-              I'm a Student
-            </Text>
-            <Text className="text-neutral-500 text-sm">
+            <Text style={styles.roleCardTitle}>I'm a Student</Text>
+            <Text style={styles.roleCardDesc}>
               Join your academy to track progress, view schedule, and shop gear.
             </Text>
           </TouchableOpacity>
@@ -213,114 +209,104 @@ export default function Onboarding() {
   // Step 2a: Create gym
   if (step === "create_gym") {
     return (
-      <SafeAreaView className="flex-1 bg-[#0a0a0a]">
+      <SafeAreaView style={common.screen}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="flex-1"
+          style={common.flex1}
         >
           <ScrollView
-            contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
-            className="px-6"
+            contentContainerStyle={styles.createScrollContent}
+            style={styles.scrollPadding}
             keyboardShouldPersistTaps="handled"
           >
-            <TouchableOpacity onPress={() => setStep("role")} className="mb-8">
-              <Text style={{ color: BRAND.primaryColor }} className="text-base">
-                Back
-              </Text>
+            <TouchableOpacity
+              onPress={() => setStep("role")}
+              style={styles.backButton}
+            >
+              <Text style={styles.backText}>Back</Text>
             </TouchableOpacity>
 
-            <Text className="text-3xl font-bold text-white mb-2">
-              Set Up Your Academy
-            </Text>
-            <Text className="text-neutral-500 mb-8 text-base">
+            <Text style={styles.createTitle}>Set Up Your Academy</Text>
+            <Text style={styles.createSubtitle}>
               This creates your gym's MatFlow account. You'll be the admin.
             </Text>
 
-            <View className="gap-4">
+            <View style={styles.form}>
               {error && (
-                <View className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
-                  <Text className="text-red-400 text-sm text-center">
-                    {error}
-                  </Text>
+                <View style={common.errorBox}>
+                  <Text style={common.errorText}>{error}</Text>
                 </View>
               )}
 
               <View>
-                <Text className="text-neutral-400 text-sm mb-2 ml-1">
-                  Academy Name *
-                </Text>
+                <Text style={common.inputLabel}>Academy Name *</Text>
                 <TextInput
-                  className="bg-[#171717] border border-[#262626] rounded-xl px-4 py-4 text-white text-base"
+                  style={common.input}
                   placeholder="e.g. Ceconi BJJ"
-                  placeholderTextColor="#525252"
+                  placeholderTextColor={theme.colors.placeholder}
                   value={gymName}
                   onChangeText={handleSlugGenerate}
                 />
               </View>
 
               <View>
-                <Text className="text-neutral-400 text-sm mb-2 ml-1">
-                  URL Slug
-                </Text>
+                <Text style={common.inputLabel}>URL Slug</Text>
                 <TextInput
-                  className="bg-[#171717] border border-[#262626] rounded-xl px-4 py-4 text-white text-base"
+                  style={common.input}
                   placeholder="ceconi-bjj"
-                  placeholderTextColor="#525252"
+                  placeholderTextColor={theme.colors.placeholder}
                   value={gymSlug}
                   onChangeText={setGymSlug}
                   autoCapitalize="none"
                 />
-                <Text className="text-neutral-600 text-xs mt-1 ml-1">
+                <Text style={styles.slugHint}>
                   matflow.app/{gymSlug || "your-gym"}
                 </Text>
               </View>
 
               <View>
-                <Text className="text-neutral-400 text-sm mb-2 ml-1">
-                  Timezone
-                </Text>
+                <Text style={common.inputLabel}>Timezone</Text>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  className="gap-2"
                 >
-                  <View className="flex-row gap-2">
-                    {TIMEZONES.map((tz) => (
-                      <TouchableOpacity
-                        key={tz}
-                        className={`px-4 py-3 rounded-xl border ${
-                          timezone === tz
-                            ? "border-[#0fe69b] bg-[#0fe69b]/10"
-                            : "border-[#262626] bg-[#171717]"
-                        }`}
-                        onPress={() => setTimezone(tz)}
-                      >
-                        <Text
-                          className={`text-sm ${
-                            timezone === tz ? "text-[#0fe69b]" : "text-neutral-400"
-                          }`}
+                  <View style={styles.timezoneRow}>
+                    {TIMEZONES.map((tz) => {
+                      const isSelected = timezone === tz;
+                      return (
+                        <TouchableOpacity
+                          key={tz}
+                          style={[
+                            styles.timezoneChip,
+                            isSelected && styles.timezoneChipActive,
+                          ]}
+                          onPress={() => setTimezone(tz)}
                         >
-                          {tz.split("/")[1]?.replace("_", " ")}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
+                          <Text
+                            style={[
+                              styles.timezoneText,
+                              isSelected && styles.timezoneTextActive,
+                            ]}
+                          >
+                            {tz.split("/")[1]?.replace("_", " ")}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
                   </View>
                 </ScrollView>
               </View>
 
               <TouchableOpacity
-                className="rounded-xl py-4 mt-4 items-center"
-                style={{ backgroundColor: BRAND.primaryColor }}
+                style={[common.primaryButton, styles.submitButton]}
                 onPress={handleCreateGym}
                 disabled={loading}
                 activeOpacity={0.8}
               >
                 {loading ? (
-                  <ActivityIndicator color="#0a0a0a" />
+                  <ActivityIndicator color={theme.colors.bg} />
                 ) : (
-                  <Text className="text-[#0a0a0a] font-bold text-base">
-                    Create Academy
-                  </Text>
+                  <Text style={common.primaryButtonText}>Create Academy</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -332,35 +318,32 @@ export default function Onboarding() {
 
   // Step 2b: Join gym
   return (
-    <SafeAreaView className="flex-1 bg-[#0a0a0a] justify-center px-6">
-      <TouchableOpacity onPress={() => setStep("role")} className="mb-8">
-        <Text style={{ color: BRAND.primaryColor }} className="text-base">
-          Back
-        </Text>
+    <SafeAreaView style={[common.screen, styles.joinContainer]}>
+      <TouchableOpacity
+        onPress={() => setStep("role")}
+        style={styles.backButton}
+      >
+        <Text style={styles.backText}>Back</Text>
       </TouchableOpacity>
 
-      <Text className="text-3xl font-bold text-white mb-2">
-        Join Your Academy
-      </Text>
-      <Text className="text-neutral-500 mb-8 text-base">
+      <Text style={styles.createTitle}>Join Your Academy</Text>
+      <Text style={styles.createSubtitle}>
         Enter the code or link your instructor gave you.
       </Text>
 
-      <View className="gap-4">
+      <View style={styles.form}>
         {error && (
-          <View className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
-            <Text className="text-red-400 text-sm text-center">{error}</Text>
+          <View style={common.errorBox}>
+            <Text style={common.errorText}>{error}</Text>
           </View>
         )}
 
         <View>
-          <Text className="text-neutral-400 text-sm mb-2 ml-1">
-            Gym Code or Slug *
-          </Text>
+          <Text style={common.inputLabel}>Gym Code or Slug *</Text>
           <TextInput
-            className="bg-[#171717] border border-[#262626] rounded-xl px-4 py-4 text-white text-base"
+            style={common.input}
             placeholder="e.g. ceconi-bjj"
-            placeholderTextColor="#525252"
+            placeholderTextColor={theme.colors.placeholder}
             value={joinCode}
             onChangeText={setJoinCode}
             autoCapitalize="none"
@@ -368,21 +351,128 @@ export default function Onboarding() {
         </View>
 
         <TouchableOpacity
-          className="rounded-xl py-4 mt-2 items-center"
-          style={{ backgroundColor: BRAND.primaryColor }}
+          style={[common.primaryButton, styles.joinButton]}
           onPress={handleJoinGym}
           disabled={loading}
           activeOpacity={0.8}
         >
           {loading ? (
-            <ActivityIndicator color="#0a0a0a" />
+            <ActivityIndicator color={theme.colors.bg} />
           ) : (
-            <Text className="text-[#0a0a0a] font-bold text-base">
-              Join Academy
-            </Text>
+            <Text style={common.primaryButtonText}>Join Academy</Text>
           )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  centered: {
+    justifyContent: "center",
+    paddingHorizontal: theme.spacing.xl + 4,
+  },
+  roleHeader: {
+    alignItems: "center",
+    marginBottom: theme.spacing["5xl"],
+  },
+  roleTitle: {
+    fontSize: 36,
+    fontWeight: "700",
+    color: theme.colors.text,
+    letterSpacing: -0.5,
+  },
+  roleSubtitle: {
+    color: theme.colors.textMuted,
+    marginTop: theme.spacing.md,
+    fontSize: 16,
+    textAlign: "center",
+  },
+  roleCards: {
+    gap: theme.spacing.lg,
+  },
+  roleCard: {
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing["2xl"],
+  },
+  roleCardTitle: {
+    color: theme.colors.text,
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  roleCardDesc: {
+    color: theme.colors.textMuted,
+    fontSize: 14,
+  },
+  scrollPadding: {
+    paddingHorizontal: theme.spacing.xl + 4,
+  },
+  createScrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+  },
+  backButton: {
+    marginBottom: theme.spacing["3xl"],
+  },
+  backText: {
+    color: theme.colors.brand,
+    fontSize: 16,
+  },
+  createTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: theme.colors.text,
+    marginBottom: theme.spacing.sm,
+  },
+  createSubtitle: {
+    color: theme.colors.textMuted,
+    marginBottom: theme.spacing["3xl"],
+    fontSize: 16,
+  },
+  form: {
+    gap: theme.spacing.lg,
+  },
+  slugHint: {
+    color: theme.colors.textFaint,
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
+  },
+  timezoneRow: {
+    flexDirection: "row",
+    gap: theme.spacing.sm,
+  },
+  timezoneChip: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
+  },
+  timezoneChipActive: {
+    borderColor: theme.colors.brand,
+    backgroundColor: theme.colors.brandMuted,
+  },
+  timezoneText: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
+  },
+  timezoneTextActive: {
+    color: theme.colors.brand,
+  },
+  submitButton: {
+    marginTop: theme.spacing.lg,
+  },
+  joinContainer: {
+    justifyContent: "center",
+    paddingHorizontal: theme.spacing.xl + 4,
+  },
+  joinButton: {
+    marginTop: theme.spacing.sm,
+  },
+});

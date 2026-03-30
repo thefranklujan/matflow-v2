@@ -1,17 +1,16 @@
 import { View, Text, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Users } from "lucide-react-native";
+import { theme, common } from "@/lib/theme";
 
 export default function MembersAdmin() {
   return (
-    <SafeAreaView className="flex-1 bg-[#0a0a0a]">
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        <View className="flex-1 items-center justify-center py-20">
-          <Users size={48} color="#404040" />
-          <Text className="text-neutral-500 text-base mt-4">
-            No members yet.
-          </Text>
-          <Text className="text-neutral-600 text-sm mt-1">
+    <SafeAreaView style={common.screen}>
+      <ScrollView style={common.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={common.emptyState}>
+          <Users size={48} color={theme.colors.textFaint} />
+          <Text style={common.emptyText}>No members yet.</Text>
+          <Text style={common.emptySubtext}>
             Share your gym's join code to invite students.
           </Text>
         </View>

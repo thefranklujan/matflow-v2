@@ -1,59 +1,83 @@
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "@/stores/auth-store";
 import { BRAND } from "@/lib/constants";
+import { theme, common } from "@/lib/theme";
 
 export default function SettingsAdmin() {
   const { activeMembership } = useAuthStore();
   const gym = activeMembership?.gym;
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0a0a0a]">
-      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-        <View className="gap-4 mt-4">
-          <View className="bg-[#171717] border border-[#262626] rounded-2xl p-5">
-            <Text className="text-neutral-500 text-xs uppercase tracking-wider mb-1">
-              Academy Name
-            </Text>
-            <Text className="text-white text-lg font-bold">
-              {gym?.name || "Not set"}
-            </Text>
+    <SafeAreaView style={common.screen}>
+      <ScrollView style={common.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.cardList}>
+          <View style={common.card}>
+            <Text style={styles.cardLabel}>Academy Name</Text>
+            <Text style={styles.cardValue}>{gym?.name || "Not set"}</Text>
           </View>
 
-          <View className="bg-[#171717] border border-[#262626] rounded-2xl p-5">
-            <Text className="text-neutral-500 text-xs uppercase tracking-wider mb-1">
-              URL Slug
-            </Text>
-            <Text className="text-white text-lg">
-              {gym?.slug || "Not set"}
-            </Text>
+          <View style={common.card}>
+            <Text style={styles.cardLabel}>URL Slug</Text>
+            <Text style={styles.cardValueLight}>{gym?.slug || "Not set"}</Text>
           </View>
 
-          <View className="bg-[#171717] border border-[#262626] rounded-2xl p-5">
-            <Text className="text-neutral-500 text-xs uppercase tracking-wider mb-1">
-              Brand Color
-            </Text>
-            <View className="flex-row items-center gap-3 mt-1">
+          <View style={common.card}>
+            <Text style={styles.cardLabel}>Brand Color</Text>
+            <View style={styles.colorRow}>
               <View
-                className="w-8 h-8 rounded-lg"
-                style={{
-                  backgroundColor: gym?.primary_color || BRAND.primaryColor,
-                }}
+                style={[
+                  styles.colorSwatch,
+                  {
+                    backgroundColor:
+                      gym?.primary_color || BRAND.primaryColor,
+                  },
+                ]}
               />
-              <Text className="text-white text-lg">
+              <Text style={styles.cardValueLight}>
                 {gym?.primary_color || BRAND.primaryColor}
               </Text>
             </View>
           </View>
 
-          <View className="bg-[#171717] border border-[#262626] rounded-2xl p-5">
-            <Text className="text-neutral-500 text-xs uppercase tracking-wider mb-1">
-              Subscription
-            </Text>
-            <Text className="text-white text-lg">Free Trial (14 days)</Text>
+          <View style={common.card}>
+            <Text style={styles.cardLabel}>Subscription</Text>
+            <Text style={styles.cardValueLight}>Free Trial (14 days)</Text>
           </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  cardList: {
+    gap: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
+  },
+  cardLabel: {
+    ...theme.typography.labelUppercase,
+    color: theme.colors.textMuted,
+    marginBottom: 4,
+  },
+  cardValue: {
+    color: theme.colors.text,
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  cardValueLight: {
+    color: theme.colors.text,
+    fontSize: 18,
+  },
+  colorRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing.md,
+    marginTop: 4,
+  },
+  colorSwatch: {
+    width: 32,
+    height: 32,
+    borderRadius: theme.borderRadius.sm,
+  },
+});

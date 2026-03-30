@@ -7,11 +7,13 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
 } from "react-native";
 import { Link } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "@/lib/supabase";
 import { BRAND } from "@/lib/constants";
+import { theme, common } from "@/lib/theme";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -41,33 +43,31 @@ export default function SignIn() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0a0a0a]">
+    <SafeAreaView style={common.screen}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1 justify-center px-6"
+        style={styles.container}
       >
-        <View className="items-center mb-12">
-          <Text className="text-4xl font-bold text-white tracking-tight">
+        <View style={styles.header}>
+          <Text style={styles.title}>
             Mat<Text style={{ color: BRAND.primaryColor }}>Flow</Text>
           </Text>
-          <Text className="text-neutral-500 mt-2 text-base">
-            Sign in to your academy
-          </Text>
+          <Text style={styles.subtitle}>Sign in to your academy</Text>
         </View>
 
-        <View className="gap-4">
+        <View style={styles.form}>
           {error && (
-            <View className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
-              <Text className="text-red-400 text-sm text-center">{error}</Text>
+            <View style={common.errorBox}>
+              <Text style={common.errorText}>{error}</Text>
             </View>
           )}
 
           <View>
-            <Text className="text-neutral-400 text-sm mb-2 ml-1">Email</Text>
+            <Text style={common.inputLabel}>Email</Text>
             <TextInput
-              className="bg-[#171717] border border-[#262626] rounded-xl px-4 py-4 text-white text-base"
+              style={common.input}
               placeholder="you@example.com"
-              placeholderTextColor="#525252"
+              placeholderTextColor={theme.colors.placeholder}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -78,13 +78,11 @@ export default function SignIn() {
           </View>
 
           <View>
-            <Text className="text-neutral-400 text-sm mb-2 ml-1">
-              Password
-            </Text>
+            <Text style={common.inputLabel}>Password</Text>
             <TextInput
-              className="bg-[#171717] border border-[#262626] rounded-xl px-4 py-4 text-white text-base"
+              style={common.input}
               placeholder="Your password"
-              placeholderTextColor="#525252"
+              placeholderTextColor={theme.colors.placeholder}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -93,29 +91,24 @@ export default function SignIn() {
           </View>
 
           <TouchableOpacity
-            className="rounded-xl py-4 mt-2 items-center"
-            style={{ backgroundColor: BRAND.primaryColor }}
+            style={[common.primaryButton, styles.signInButton]}
             onPress={handleSignIn}
             disabled={loading}
             activeOpacity={0.8}
           >
             {loading ? (
-              <ActivityIndicator color="#0a0a0a" />
+              <ActivityIndicator color={theme.colors.bg} />
             ) : (
-              <Text className="text-[#0a0a0a] font-bold text-base">
-                Sign In
-              </Text>
+              <Text style={common.primaryButtonText}>Sign In</Text>
             )}
           </TouchableOpacity>
         </View>
 
-        <View className="flex-row justify-center mt-8">
-          <Text className="text-neutral-500">No account yet? </Text>
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>No account yet? </Text>
           <Link href="/(auth)/sign-up" asChild>
             <TouchableOpacity>
-              <Text style={{ color: BRAND.primaryColor }} className="font-semibold">
-                Sign Up
-              </Text>
+              <Text style={styles.footerLink}>Sign Up</Text>
             </TouchableOpacity>
           </Link>
         </View>
@@ -123,3 +116,46 @@ export default function SignIn() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: theme.spacing.xl + 4,
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: theme.spacing["5xl"],
+  },
+  title: {
+    fontSize: 36,
+    fontWeight: "700",
+    color: theme.colors.text,
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    color: theme.colors.textMuted,
+    marginTop: theme.spacing.sm,
+    fontSize: 16,
+  },
+  form: {
+    gap: theme.spacing.lg,
+  },
+  signInButton: {
+    marginTop: theme.spacing.sm,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: theme.spacing["3xl"],
+  },
+  footerText: {
+    color: theme.colors.textMuted,
+    fontSize: 14,
+  },
+  footerLink: {
+    color: theme.colors.brand,
+    fontWeight: "600",
+    fontSize: 14,
+  },
+});
